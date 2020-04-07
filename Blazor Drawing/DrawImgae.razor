@@ -1,0 +1,37 @@
+﻿@using BlazorDrawing.Graphish
+@using Microsoft.JSInterop
+@using BlazorDrawing
+@inject IJSRuntime js;
+
+
+<canvas id="@id" width="@Width" height="@Height"></canvas>
+
+
+@code {
+    protected string id { get; private set; }
+    [Parameter]
+    public int Width { get; set; }
+    [Parameter]
+    public int Height { get; set; }
+    [Parameter]
+    public Action<DrawImgae> Initilized { get; set; }
+    [Parameter]
+    public Action<object, cartoonistService> Draw { get; set; }
+    private JavascripsCaller javascrips { get; set; }
+    public cartoonistService cartoonistService { get; private set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        id = Guid.NewGuid().ToString();
+        javascrips = new JavascripsCaller(js);
+        cartoonistService = new cartoonistService(id, javascrips);
+        Initilized(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        cartoonistService.Clear();
+        Draw(this, cartoonistService);
+        cartoonistService.Draw();
+    }
+}
